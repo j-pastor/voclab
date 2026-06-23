@@ -4,11 +4,11 @@
 
 ---
 
-## English
+# English
 
-### Overview
+## Overview
 
-**VocLab** is a web application for creating, validating, managing, visualizing and exporting controlled vocabularies. It is designed for educational, research and professional contexts where users need to work with vocabularies, taxonomies, thesauri or SKOS-like structures using a simple tabular workflow.
+**VocLab** is a web application for creating, validating, managing, visualizing and exporting controlled vocabularies. It is designed for educational, research and professional contexts where users need to work with vocabularies, taxonomies, thesauri or SKOS-like structures through a simple tabular workflow.
 
 VocLab allows users to upload vocabularies from CSV or TSV files, validate their structure and semantic consistency, browse their content through different views, inspect vocabulary statistics, visualize concept relationships as a graph, and export valid vocabularies in interoperable formats such as CSV, TBL, Turtle and RDF/XML.
 
@@ -20,19 +20,19 @@ The application is especially useful for teaching controlled vocabularies, metad
 
 ---
 
-### Main features
+## Main features
 
 VocLab provides the following main features:
 
 * User authentication and role-based access control.
-* Administrator account setup on first execution.
+* Initial administrator password setup.
 * User management by administrators.
-* Vocabulary creation from CSV or TSV source files.
+* Vocabulary creation from CSV or TSV files.
 * Vocabulary metadata management.
 * Vocabulary validation according to a predefined tabular template.
 * Support for multilingual labels and notes.
-* Support for concepts, concept schemes and collections.
-* Validation of broader, narrower, related and membership relations.
+* Support for concept schemes, concepts and collections.
+* Validation of hierarchical, associative and collection membership relations.
 * Detection of duplicate codes, invalid language tags and hierarchical cycles.
 * Public or private visibility for vocabularies.
 * Interactive vocabulary browsing.
@@ -44,15 +44,15 @@ VocLab provides the following main features:
 
 ---
 
-### Requirements
+## Requirements
 
 VocLab is a PHP and MySQL/MariaDB web application.
 
-Minimum recommended requirements:
+Recommended requirements:
 
 * PHP 8.0 or higher.
 * MySQL or MariaDB.
-* Web server with PHP support, such as Apache HTTP Server or Nginx.
+* A web server with PHP support, such as Apache HTTP Server or Nginx.
 * PDO MySQL extension enabled.
 * A modern web browser.
 
@@ -67,7 +67,7 @@ Local fallback copies of these libraries may be included under `assets/vendor/`.
 
 ---
 
-### Repository structure
+## Repository structure
 
 A typical VocLab installation contains the following folders and files:
 
@@ -118,21 +118,17 @@ voclab/
 
 ---
 
-### Installation
+## Installation
 
-#### 1. Copy the application files
+### 1. Copy the application files
 
 Clone or download the repository into your web server directory.
-
-Example:
 
 ```bash
 git clone https://github.com/your-user/voclab.git
 ```
 
-Then place the project in the directory served by your web server.
-
-For example:
+Place the project in the directory served by your web server, for example:
 
 ```text
 /var/www/html/voclab
@@ -142,19 +138,15 @@ or another equivalent location depending on your server configuration.
 
 ---
 
-#### 2. Create the database
+### 2. Create the database
 
-Create an empty MySQL or MariaDB database for VocLab.
-
-Example:
+Create an empty MySQL or MariaDB database for VocLab:
 
 ```sql
 CREATE DATABASE voclab CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-Create or select a database user with the required permissions.
-
-Example:
+Create or select a database user with the required permissions:
 
 ```sql
 CREATE USER 'voclab_user'@'localhost' IDENTIFIED BY 'change_this_password';
@@ -164,7 +156,7 @@ FLUSH PRIVILEGES;
 
 ---
 
-#### 3. Configure the application
+### 3. Configure the application
 
 Edit:
 
@@ -191,7 +183,7 @@ Before deploying VocLab in a production environment, replace all example credent
 
 ---
 
-#### 4. Initialize the database schema
+### 4. Initialize the database schema
 
 VocLab can initialize the database schema automatically from:
 
@@ -209,7 +201,7 @@ mysql -u voclab_user -p voclab < sql/schema.sql
 
 ---
 
-#### 5. Open the application
+### 5. Open the application
 
 Open the application in your browser:
 
@@ -221,7 +213,7 @@ On first execution, VocLab checks whether the default administrator account exis
 
 ---
 
-### First access
+## First access
 
 VocLab includes an initial administrator account created by the database schema.
 
@@ -237,7 +229,7 @@ After that, the administrator can log in and manage users and vocabularies.
 
 ---
 
-### User management
+## User management
 
 Only administrator users can manage user accounts.
 
@@ -265,7 +257,7 @@ Administrators can manage all vocabularies and all users. Regular users can mana
 
 ---
 
-### Vocabulary management
+## Vocabulary management
 
 Authenticated users can create vocabularies from CSV or TSV files.
 
@@ -287,35 +279,171 @@ A vocabulary can be marked as public only when it is valid. Public vocabularies 
 
 ---
 
-### Vocabulary source format
+## Vocabulary source format
 
-VocLab uses a tabular template to represent vocabulary resources. Source files can be provided as CSV or TSV.
+VocLab uses a tabular source format to represent controlled vocabularies. Vocabulary files can be uploaded as **CSV** or **TSV** files. Each row represents one vocabulary resource, and each column describes a specific property of that resource.
 
-The vocabulary template may include resources such as:
+The first row of the file must contain the column names. VocLab expects the following columns, in this order:
 
-* Concept schemes.
-* Concepts.
-* Collections.
+```text
+resource_type,code,prefLabel,altLabel,hiddenLabel,notation,definition,scopeNote,broader,related,memberOf,sameAs
+```
 
-The template supports multilingual values using a `value@language` syntax.
+### Columns
 
-Example:
+| Column          | Required | Description                                                                                                                                    |
+| --------------- | -------: | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `resource_type` |      Yes | Type of resource represented by the row. Supported values are `concept`, `collection` and `conceptscheme`.                                     |
+| `code`          |      Yes | Local identifier of the resource. It must be unique within the vocabulary. Other relationship columns use this value to refer to the resource. |
+| `prefLabel`     |      Yes | Preferred label of the resource. Values must include language tags using the `value@language` syntax.                                          |
+| `altLabel`      |       No | Alternative labels or synonyms. Multiple values can be separated with `\|`.                                                                    |
+| `hiddenLabel`   |       No | Hidden labels, spelling variants or non-preferred access terms that should not be displayed as ordinary synonyms.                              |
+| `notation`      |       No | Classification code, notation or internal reference associated with the resource.                                                              |
+| `definition`    |       No | Definition of the resource. Values should use the `value@language` syntax.                                                                     |
+| `scopeNote`     |       No | Scope note explaining how the resource should be used. Values should use the `value@language` syntax.                                          |
+| `broader`       |       No | Code of one or more broader concepts. Multiple broader concepts can be separated with `\|`.                                                    |
+| `related`       |       No | Code of one or more associated concepts. Multiple related concepts can be separated with `\|`.                                                 |
+| `memberOf`      |       No | Code of one or more collections to which the resource belongs. Multiple collections can be separated with `\|`.                                |
+| `sameAs`        |       No | External URI, IRI or URN identifying an equivalent resource. Multiple values can be separated with `\|`.                                       |
+
+### Resource types
+
+The `resource_type` column accepts three values:
+
+```text
+concept
+collection
+conceptscheme
+```
+
+A `concept` represents a vocabulary term or category. Most rows in a vocabulary will normally be concepts.
+
+A `collection` represents a grouping of resources. Collections are useful when a set of concepts needs to be grouped without creating a hierarchical broader/narrower relation.
+
+A `conceptscheme` represents the vocabulary as a whole. A vocabulary may include a row of this type to provide labels, definitions or notes for the complete concept scheme.
+
+### Multilingual values
+
+VocLab represents multilingual labels and notes using the following syntax:
+
+```text
+value@language
+```
+
+For example:
+
+```text
+Climate change@en
+```
+
+A field can contain several multilingual values separated with the pipe character:
 
 ```text
 Climate change@en|Cambio climático@es
 ```
 
-Repeated values are separated with the pipe character:
+The language code must match one of the languages configured for the vocabulary. For example, if the vocabulary languages are:
 
 ```text
-global warming@en|climate crisis@en|calentamiento global@es
+en,es
 ```
 
-The exact expected columns are defined by the VocLab validation rules and by the sample files included with the application.
+then values such as the following are valid:
+
+```text
+Action@en|Acción@es
+```
+
+but a value such as the following would be invalid if `fr` is not one of the available languages:
+
+```text
+Action@en|Acción@es|Action culturelle@fr
+```
+
+The following columns use multilingual values:
+
+```text
+prefLabel
+altLabel
+hiddenLabel
+definition
+scopeNote
+```
+
+### Relationships between resources
+
+Relationships are expressed by writing the `code` of another resource.
+
+For example, if the vocabulary contains this concept:
+
+```csv
+concept,action,Action@en|Acción@es,,,,,,,,,
+```
+
+another concept can refer to it as a broader concept:
+
+```csv
+concept,platform-games,Platform games@en|Juegos de plataformas@es,,,,,,action,,,
+```
+
+Multiple relationship targets are separated with `|`:
+
+```csv
+concept,metroidvania,Metroidvania@en|Metroidvania@es,,,,,,platform-games,open-world|action-rpg,,
+```
+
+VocLab validates that the referenced codes exist in the vocabulary.
+
+The main relationship columns are:
+
+| Column     | Meaning                                        |
+| ---------- | ---------------------------------------------- |
+| `broader`  | Hierarchical parent concept.                   |
+| `related`  | Associative relationship with another concept. |
+| `memberOf` | Collection to which the resource belongs.      |
+| `sameAs`   | External equivalent URI, IRI or URN.           |
+
+### Example
+
+The following simplified example shows a small bilingual vocabulary fragment:
+
+```csv
+resource_type,code,prefLabel,altLabel,hiddenLabel,notation,definition,scopeNote,broader,related,memberOf,sameAs
+conceptscheme,video-game-genres,Video game genres@en|Géneros de videojuegos@es,,,,A vocabulary for describing video game genres.@en|Vocabulario para describir géneros de videojuegos.@es,,,,,
+concept,action,Action@en|Acción@es,Action game@en|Videojuego de acción@es,,GEN-ACT,A genre focused on real-time challenges and player reaction.@en|Género centrado en desafíos en tiempo real y reacción del jugador.@es,,,,,
+concept,platform-games,Platform games@en|Juegos de plataformas@es,Platformers@en,,GEN-PLA,A genre based on jumping movement and spatial progression.@en|Género basado en saltos movimiento y progresión espacial.@es,,action,,,
+concept,metroidvania,Metroidvania@en|Metroidvania@es,,,GEN-MET,A subgenre based on interconnected exploration and progressive unlocking of abilities.@en|Subgénero basado en exploración interconectada y desbloqueo progresivo de habilidades.@es,,platform-games,action-rpg,,
+collection,action-subgenres,Action subgenres@en|Subgéneros de acción@es,,,,,,,,
+concept,action-rpg,Action RPG@en|RPG de acción@es,,,GEN-ARPG,A role-playing game with real-time action mechanics.@en|Juego de rol con mecánicas de acción en tiempo real.@es,,action,,action-subgenres,
+```
+
+In this example:
+
+* `video-game-genres` is the concept scheme.
+* `action`, `platform-games`, `metroidvania` and `action-rpg` are concepts.
+* `platform-games` has `action` as its broader concept.
+* `metroidvania` has `platform-games` as its broader concept.
+* `metroidvania` is related to `action-rpg`.
+* `action-rpg` belongs to the `action-subgenres` collection.
+
+### Validation rules
+
+When a vocabulary is uploaded or edited, VocLab checks that:
+
+* the required columns exist and appear in the expected order;
+* each resource has a valid `resource_type`;
+* each resource has a unique `code`;
+* each resource has at least one valid `prefLabel`;
+* multilingual values use valid language tags;
+* language tags match the available languages configured for the vocabulary;
+* relationship targets in `broader`, `related` and `memberOf` exist;
+* broader relations do not create hierarchical cycles;
+* related concepts are not placed in the same direct hierarchical path;
+* values in `sameAs` are valid URI, IRI or URN values.
 
 ---
 
-### Vocabulary validation
+## Vocabulary validation
 
 When a vocabulary is uploaded or edited, VocLab validates its content before storing or updating it.
 
@@ -337,7 +465,7 @@ If validation fails, VocLab reports the detected errors so the user can correct 
 
 ---
 
-### Editing vocabularies
+## Editing vocabularies
 
 Existing vocabularies can be edited by authorized users.
 
@@ -357,7 +485,7 @@ The grid editor provides a spreadsheet-like interface for editing vocabulary row
 
 ---
 
-### Using vocabularies
+## Using vocabularies
 
 The vocabulary detail page provides several ways to explore a vocabulary.
 
@@ -378,14 +506,14 @@ The detail panel displays labels, notes, semantic relations, collection membersh
 
 ---
 
-### Graph visualization
+## Graph visualization
 
 VocLab includes an interactive graph visualization based on D3.js.
 
 The graph view allows users to:
 
 * Explore concept hierarchies visually.
-* Display broader/narrower relations.
+* Display broader and narrower relations.
 * Display related concept links.
 * Expand or collapse concept branches.
 * Drag nodes.
@@ -399,7 +527,7 @@ The graph view allows users to:
 
 ---
 
-### Vocabulary statistics
+## Vocabulary statistics
 
 VocLab can calculate descriptive statistics for a vocabulary.
 
@@ -425,7 +553,7 @@ Global statistics and per-concept statistics can be downloaded as CSV files.
 
 ---
 
-### Export options
+## Export options
 
 Valid vocabularies can be exported in several formats:
 
@@ -461,7 +589,7 @@ Turtle and RDF/XML exports are generated from the internal vocabulary model and 
 
 ---
 
-### Public vocabularies
+## Public vocabularies
 
 A vocabulary can be made public when it has passed validation.
 
@@ -471,7 +599,7 @@ Private vocabularies are visible only to administrators and assigned users.
 
 ---
 
-### Example files
+## Example files
 
 The repository may include example CSV files that can be used to test the application.
 
@@ -493,7 +621,7 @@ These files illustrate the expected vocabulary template and can be used for test
 
 ---
 
-### Security notes
+## Security notes
 
 Before deploying VocLab in production:
 
@@ -506,7 +634,7 @@ Before deploying VocLab in production:
 
 ---
 
-### License
+## License
 
 VocLab is free software released under the **GNU General Public License v3.0**.
 
@@ -516,9 +644,9 @@ See the `LICENSE` file for details.
 
 ---
 
-## Español
+# Español
 
-### Descripción general
+## Descripción general
 
 **VocLab** es una aplicación web para crear, validar, gestionar, visualizar y exportar vocabularios controlados. Está pensada para contextos docentes, de investigación y profesionales en los que sea necesario trabajar con vocabularios, taxonomías, tesauros o estructuras similares a SKOS mediante un flujo de trabajo sencillo basado en tablas.
 
@@ -532,7 +660,7 @@ La aplicación resulta especialmente útil para la enseñanza de vocabularios co
 
 ---
 
-### Funcionalidades principales
+## Funcionalidades principales
 
 VocLab ofrece las siguientes funcionalidades:
 
@@ -543,7 +671,7 @@ VocLab ofrece las siguientes funcionalidades:
 * Gestión de metadatos de vocabularios.
 * Validación de vocabularios según una plantilla tabular predefinida.
 * Soporte para etiquetas y notas multilingües.
-* Soporte para conceptos, esquemas de conceptos y colecciones.
+* Soporte para esquemas de conceptos, conceptos y colecciones.
 * Validación de relaciones jerárquicas, asociativas y de pertenencia a colecciones.
 * Detección de códigos duplicados, etiquetas de idioma no válidas y ciclos jerárquicos.
 * Visibilidad pública o privada de vocabularios.
@@ -556,11 +684,11 @@ VocLab ofrece las siguientes funcionalidades:
 
 ---
 
-### Requisitos
+## Requisitos
 
 VocLab es una aplicación web desarrollada en PHP y MySQL/MariaDB.
 
-Requisitos mínimos recomendados:
+Requisitos recomendados:
 
 * PHP 8.0 o superior.
 * MySQL o MariaDB.
@@ -579,7 +707,7 @@ Pueden incluirse copias locales de respaldo de estas bibliotecas en `assets/vend
 
 ---
 
-### Estructura del repositorio
+## Estructura del repositorio
 
 Una instalación típica de VocLab contiene las siguientes carpetas y ficheros:
 
@@ -630,21 +758,17 @@ voclab/
 
 ---
 
-### Instalación
+## Instalación
 
-#### 1. Copiar los ficheros de la aplicación
+### 1. Copiar los ficheros de la aplicación
 
 Clona o descarga el repositorio en el directorio de tu servidor web.
-
-Ejemplo:
 
 ```bash
 git clone https://github.com/your-user/voclab.git
 ```
 
-Después, coloca el proyecto en el directorio servido por tu servidor web.
-
-Por ejemplo:
+Coloca el proyecto en el directorio servido por tu servidor web, por ejemplo:
 
 ```text
 /var/www/html/voclab
@@ -654,19 +778,15 @@ o en otra ubicación equivalente según la configuración del servidor.
 
 ---
 
-#### 2. Crear la base de datos
+### 2. Crear la base de datos
 
-Crea una base de datos vacía en MySQL o MariaDB para VocLab.
-
-Ejemplo:
+Crea una base de datos vacía en MySQL o MariaDB para VocLab:
 
 ```sql
 CREATE DATABASE voclab CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-Crea o selecciona un usuario de base de datos con los permisos necesarios.
-
-Ejemplo:
+Crea o selecciona un usuario de base de datos con los permisos necesarios:
 
 ```sql
 CREATE USER 'voclab_user'@'localhost' IDENTIFIED BY 'change_this_password';
@@ -676,7 +796,7 @@ FLUSH PRIVILEGES;
 
 ---
 
-#### 3. Configurar la aplicación
+### 3. Configurar la aplicación
 
 Edita:
 
@@ -703,7 +823,7 @@ Antes de desplegar VocLab en un entorno de producción, sustituye todas las cred
 
 ---
 
-#### 4. Inicializar el esquema de la base de datos
+### 4. Inicializar el esquema de la base de datos
 
 VocLab puede inicializar automáticamente el esquema de la base de datos a partir de:
 
@@ -721,7 +841,7 @@ mysql -u voclab_user -p voclab < sql/schema.sql
 
 ---
 
-#### 5. Abrir la aplicación
+### 5. Abrir la aplicación
 
 Abre la aplicación en el navegador:
 
@@ -733,7 +853,7 @@ En la primera ejecución, VocLab comprueba si existe la cuenta administradora po
 
 ---
 
-### Primer acceso
+## Primer acceso
 
 VocLab incluye una cuenta administradora inicial creada por el esquema de base de datos.
 
@@ -749,7 +869,7 @@ Después, el administrador podrá iniciar sesión y gestionar usuarios y vocabul
 
 ---
 
-### Gestión de usuarios
+## Gestión de usuarios
 
 Solo los usuarios administradores pueden gestionar cuentas de usuario.
 
@@ -777,7 +897,7 @@ Los administradores pueden gestionar todos los vocabularios y todos los usuarios
 
 ---
 
-### Gestión de vocabularios
+## Gestión de vocabularios
 
 Los usuarios autenticados pueden crear vocabularios a partir de ficheros CSV o TSV.
 
@@ -799,35 +919,171 @@ Un vocabulario puede marcarse como público solo cuando es válido. Los vocabula
 
 ---
 
-### Formato fuente de los vocabularios
+## Formato fuente de los vocabularios
 
-VocLab utiliza una plantilla tabular para representar los recursos del vocabulario. Los ficheros fuente pueden proporcionarse en CSV o TSV.
+VocLab utiliza un formato tabular para representar vocabularios controlados. Los vocabularios pueden cargarse como ficheros **CSV** o **TSV**. Cada fila representa un recurso del vocabulario, y cada columna describe una propiedad concreta de ese recurso.
 
-La plantilla puede incluir recursos como:
+La primera fila del fichero debe contener los nombres de las columnas. VocLab espera las siguientes columnas, en este orden:
 
-* Esquemas de conceptos.
-* Conceptos.
-* Colecciones.
+```text
+resource_type,code,prefLabel,altLabel,hiddenLabel,notation,definition,scopeNote,broader,related,memberOf,sameAs
+```
 
-La plantilla permite valores multilingües mediante la sintaxis `valor@idioma`.
+### Columnas
 
-Ejemplo:
+| Columna         | Obligatoria | Descripción                                                                                                                                   |
+| --------------- | ----------: | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `resource_type` |          Sí | Tipo de recurso representado por la fila. Los valores admitidos son `concept`, `collection` y `conceptscheme`.                                |
+| `code`          |          Sí | Identificador local del recurso. Debe ser único dentro del vocabulario. Las columnas de relaciones usan este valor para referirse al recurso. |
+| `prefLabel`     |          Sí | Etiqueta preferente del recurso. Los valores deben incluir etiquetas de idioma mediante la sintaxis `valor@idioma`.                           |
+| `altLabel`      |          No | Etiquetas alternativas o sinónimos. Se pueden incluir varios valores separados con `\|`.                                                      |
+| `hiddenLabel`   |          No | Etiquetas ocultas, variantes ortográficas o términos de acceso no preferentes que no deben mostrarse como sinónimos ordinarios.               |
+| `notation`      |          No | Código de clasificación, notación o referencia interna asociada al recurso.                                                                   |
+| `definition`    |          No | Definición del recurso. Los valores deben usar la sintaxis `valor@idioma`.                                                                    |
+| `scopeNote`     |          No | Nota de alcance que explica cómo debe utilizarse el recurso. Los valores deben usar la sintaxis `valor@idioma`.                               |
+| `broader`       |          No | Código de uno o varios conceptos superiores. Si hay varios, se separan con `\|`.                                                              |
+| `related`       |          No | Código de uno o varios conceptos asociados. Si hay varios, se separan con `\|`.                                                               |
+| `memberOf`      |          No | Código de una o varias colecciones a las que pertenece el recurso. Si hay varias, se separan con `\|`.                                        |
+| `sameAs`        |          No | URI, IRI o URN externa que identifica un recurso equivalente. Se pueden incluir varios valores separados con `\|`.                            |
+
+### Tipos de recurso
+
+La columna `resource_type` acepta tres valores:
+
+```text
+concept
+collection
+conceptscheme
+```
+
+Un `concept` representa un término, categoría o unidad conceptual del vocabulario. Normalmente, la mayoría de las filas de un vocabulario serán conceptos.
+
+Una `collection` representa una agrupación de recursos. Las colecciones son útiles cuando se necesita agrupar un conjunto de conceptos sin crear una relación jerárquica de tipo superior/inferior.
+
+Un `conceptscheme` representa el vocabulario en su conjunto. Un vocabulario puede incluir una fila de este tipo para proporcionar etiquetas, definiciones o notas del esquema completo.
+
+### Valores multilingües
+
+VocLab representa etiquetas y notas multilingües mediante la siguiente sintaxis:
+
+```text
+valor@idioma
+```
+
+Por ejemplo:
+
+```text
+Climate change@en
+```
+
+Un campo puede contener varios valores multilingües separados mediante el carácter de barra vertical:
 
 ```text
 Climate change@en|Cambio climático@es
 ```
 
-Los valores repetidos se separan mediante el carácter de barra vertical:
+El código de idioma debe coincidir con uno de los idiomas configurados para el vocabulario. Por ejemplo, si los idiomas disponibles del vocabulario son:
 
 ```text
-global warming@en|climate crisis@en|calentamiento global@es
+en,es
 ```
 
-Las columnas exactas esperadas están definidas por las reglas de validación de VocLab y por los ficheros de ejemplo incluidos con la aplicación.
+entonces valores como los siguientes son válidos:
+
+```text
+Action@en|Acción@es
+```
+
+pero un valor como el siguiente sería inválido si `fr` no forma parte de los idiomas disponibles:
+
+```text
+Action@en|Acción@es|Action culturelle@fr
+```
+
+Las siguientes columnas usan valores multilingües:
+
+```text
+prefLabel
+altLabel
+hiddenLabel
+definition
+scopeNote
+```
+
+### Relaciones entre recursos
+
+Las relaciones se expresan escribiendo el `code` de otro recurso.
+
+Por ejemplo, si el vocabulario contiene este concepto:
+
+```csv
+concept,action,Action@en|Acción@es,,,,,,,,,
+```
+
+otro concepto puede referirse a él como concepto superior:
+
+```csv
+concept,platform-games,Platform games@en|Juegos de plataformas@es,,,,,,action,,,
+```
+
+Cuando una relación tiene varios destinos, se separan con `|`:
+
+```csv
+concept,metroidvania,Metroidvania@en|Metroidvania@es,,,,,,platform-games,open-world|action-rpg,,
+```
+
+VocLab valida que los códigos referenciados existan en el vocabulario.
+
+Las principales columnas de relación son:
+
+| Columna    | Significado                              |
+| ---------- | ---------------------------------------- |
+| `broader`  | Concepto superior jerárquico.            |
+| `related`  | Relación asociativa con otro concepto.   |
+| `memberOf` | Colección a la que pertenece el recurso. |
+| `sameAs`   | URI, IRI o URN externa equivalente.      |
+
+### Ejemplo
+
+El siguiente ejemplo simplificado muestra un pequeño fragmento de vocabulario bilingüe:
+
+```csv
+resource_type,code,prefLabel,altLabel,hiddenLabel,notation,definition,scopeNote,broader,related,memberOf,sameAs
+conceptscheme,video-game-genres,Video game genres@en|Géneros de videojuegos@es,,,,A vocabulary for describing video game genres.@en|Vocabulario para describir géneros de videojuegos.@es,,,,,
+concept,action,Action@en|Acción@es,Action game@en|Videojuego de acción@es,,GEN-ACT,A genre focused on real-time challenges and player reaction.@en|Género centrado en desafíos en tiempo real y reacción del jugador.@es,,,,,
+concept,platform-games,Platform games@en|Juegos de plataformas@es,Platformers@en,,GEN-PLA,A genre based on jumping movement and spatial progression.@en|Género basado en saltos movimiento y progresión espacial.@es,,action,,,
+concept,metroidvania,Metroidvania@en|Metroidvania@es,,,GEN-MET,A subgenre based on interconnected exploration and progressive unlocking of abilities.@en|Subgénero basado en exploración interconectada y desbloqueo progresivo de habilidades.@es,,platform-games,action-rpg,,
+collection,action-subgenres,Action subgenres@en|Subgéneros de acción@es,,,,,,,,
+concept,action-rpg,Action RPG@en|RPG de acción@es,,,GEN-ARPG,A role-playing game with real-time action mechanics.@en|Juego de rol con mecánicas de acción en tiempo real.@es,,action,,action-subgenres,
+```
+
+En este ejemplo:
+
+* `video-game-genres` es el esquema de conceptos.
+* `action`, `platform-games`, `metroidvania` y `action-rpg` son conceptos.
+* `platform-games` tiene `action` como concepto superior.
+* `metroidvania` tiene `platform-games` como concepto superior.
+* `metroidvania` está relacionado con `action-rpg`.
+* `action-rpg` pertenece a la colección `action-subgenres`.
+
+### Reglas de validación
+
+Cuando se carga o edita un vocabulario, VocLab comprueba que:
+
+* las columnas obligatorias existen y aparecen en el orden esperado;
+* cada recurso tiene un `resource_type` válido;
+* cada recurso tiene un `code` único;
+* cada recurso tiene al menos un `prefLabel` válido;
+* los valores multilingües usan etiquetas de idioma válidas;
+* las etiquetas de idioma coinciden con los idiomas disponibles configurados para el vocabulario;
+* los destinos de las relaciones en `broader`, `related` y `memberOf` existen;
+* las relaciones jerárquicas no generan ciclos;
+* los conceptos relacionados no están situados en la misma ruta jerárquica directa;
+* los valores de `sameAs` son URI, IRI o URN válidas.
 
 ---
 
-### Validación de vocabularios
+## Validación de vocabularios
 
 Cuando se carga o edita un vocabulario, VocLab valida su contenido antes de almacenarlo o actualizarlo.
 
@@ -849,7 +1105,7 @@ Si la validación falla, VocLab informa de los errores detectados para que el us
 
 ---
 
-### Edición de vocabularios
+## Edición de vocabularios
 
 Los vocabularios existentes pueden ser editados por usuarios autorizados.
 
@@ -869,7 +1125,7 @@ El editor en tabla ofrece una interfaz similar a una hoja de cálculo para modif
 
 ---
 
-### Uso de vocabularios
+## Uso de vocabularios
 
 La página de detalle del vocabulario ofrece varias formas de explorar sus contenidos.
 
@@ -890,7 +1146,7 @@ El panel de detalle muestra etiquetas, notas, relaciones semánticas, pertenenci
 
 ---
 
-### Visualización gráfica
+## Visualización gráfica
 
 VocLab incluye una visualización gráfica interactiva basada en D3.js.
 
@@ -911,7 +1167,7 @@ La vista de grafo permite:
 
 ---
 
-### Estadísticas del vocabulario
+## Estadísticas del vocabulario
 
 VocLab puede calcular estadísticas descriptivas de un vocabulario.
 
@@ -937,7 +1193,7 @@ Las estadísticas globales y las estadísticas por concepto pueden descargarse c
 
 ---
 
-### Opciones de exportación
+## Opciones de exportación
 
 Los vocabularios válidos pueden exportarse en varios formatos:
 
@@ -973,7 +1229,7 @@ Las exportaciones Turtle y RDF/XML se generan a partir del modelo interno del vo
 
 ---
 
-### Vocabularios públicos
+## Vocabularios públicos
 
 Un vocabulario puede hacerse público cuando ha superado la validación.
 
@@ -983,7 +1239,7 @@ Los vocabularios privados solo son visibles para administradores y usuarios asig
 
 ---
 
-### Ficheros de ejemplo
+## Ficheros de ejemplo
 
 El repositorio puede incluir ficheros CSV de ejemplo para probar la aplicación.
 
@@ -1005,20 +1261,20 @@ Estos ficheros ilustran la plantilla esperada y pueden utilizarse para probar la
 
 ---
 
-### Notas de seguridad
+## Notas de seguridad
 
 Antes de desplegar VocLab en producción:
 
 * Sustituye las credenciales de ejemplo de `config/config.php`.
-* Usa una contraseña fuerte para la cuenta administradora.
+* Usa una contraseña fuerte para la cuenta del administrador.
 * Limita los permisos del usuario de base de datos a la base de datos necesaria.
-* Sirve la aplicación mediante HTTPS.
-* Mantén actualizados PHP, MySQL/MariaDB y el servidor web.
-* Evita subir al servidor público ficheros de desarrollo, borradores o copias de seguridad de la base de datos.
+* Utilizar la aplicación mediante HTTPS.
+* Manenter actualizados PHP, MySQL/MariaDB y el servidor web.
+* Evitar subir al servidor público ficheros de desarrollo, borradores o copias de seguridad de la base de datos.
 
 ---
 
-### Licencia
+## Licencia
 
 VocLab es software libre publicado bajo la **GNU General Public License v3.0**.
 
